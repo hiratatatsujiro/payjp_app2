@@ -11,6 +11,16 @@ class UsersController < ApplicationController
     end
   end
 
+  def show
+    Payjp.api_key = ENV["PAYJP_SECRET_KEY"]
+    card = Card.find_by(user_id: current_user.id)
+
+    redirect_to card_path and return unless card.present?
+
+    customer = Payjp::Customer.retrieve(card.customer_token)
+    @card = customer.cards.first
+  end
+
   private
   def user_params
     params.require(:user).permit(:name, :email)
